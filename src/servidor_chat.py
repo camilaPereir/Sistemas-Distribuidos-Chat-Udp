@@ -6,19 +6,27 @@ import sys
 HOST = ""  # Endereco IP do Servidor
 PORT = 5000  # Porta que o Servidor esta
 DEBUG = True
-LISTA_USUARIO = []
+USER_LIST = []
 
 
-def adicionar_usuario(usuario, cliente):
-    novo_usuario = {}
-    novo_usuario["name"] = usuario["name"]
-    novo_usuario["connection"] = cliente
-    novo_usuario["group_id"] = usuario["group_id"]
-    LISTA_USUARIO.append(novo_usuario)
+def add_user(user, cliente):
+    new_user = {}
+    new_user["name"] = user["name"]
+    new_user["connection"] = cliente
+    new_user["group_id"] = user["group_id"]
+    USER_LIST.append(new_user)
+
+
+def remove_user(user, cliente):
+    removed_user = {}
+    removed_user["name"] = user["name"]
+    removed_user["connection"] = cliente
+    removed_user["group_id"] = user["group_id"]
+    USER_LIST.remove(removed_user)
 
 
 def server(udp):
-    global LISTA_USUARIO
+    global USER_LIST
     print(f"Starting UDP Server on port {PORT}")
     orig = ("", PORT)
     udp.bind(orig)
@@ -30,7 +38,7 @@ def server(udp):
         try:
             string_dict = json.loads(msg_decoded)
             if string_dict["action"] == 1:
-                adicionar_usuario(string_dict, cliente)
+                add_user(string_dict, cliente)
                 msg = {
                     "action": 1,
                     "name": string_dict["name"],
@@ -44,8 +52,24 @@ def server(udp):
                     udp.sendto(msg_json.encode("utf-8"), cliente)
 
             elif string_dict["action"] == 2:
-                print("Saindo...")
-                sys.exit(0)
+                remove_user(string_dict, cliente)
+                msg = {
+                    "action": 2,
+                    "name": string_dict["name"],
+                    "group_id": string_dict["group_id"],
+                    "status": 1
+                }
+
+                msg_json = json.dumps(msg)
+
+                udp.sendto(msg_json.encode("utf-8"), cliente)
+
+                msg = {
+                    "group_id": string_dict["group_id"],
+                    "name": string_dict["name"],
+                    "msg": f"{string_dict['name']} SAIU DO GRUPO"
+                }
+
             elif string_dict["action"] == 3:
                 msg = {
                     "action": 3,
@@ -67,7 +91,7 @@ def server(udp):
 
                 msg_json = json.dumps(msg)
 
-                for users in LISTA_USUARIO:
+                for users in USER_LIST:
                     if users["group_id"] == string_dict["group_id"]:
                         if users["connection"] != cliente:
                             udp.sendto(msg_json.encode(
