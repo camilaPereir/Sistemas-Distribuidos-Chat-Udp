@@ -25,6 +25,16 @@ def remove_user(user, cliente):
     USER_LIST.remove(removed_user)
 
 
+def send_message(udp, cliente, string_dict, msg):
+    msg_json = json.dumps(msg)
+
+    for users in USER_LIST:
+        if users["group_id"] == string_dict["group_id"]:
+            if users["connection"] != cliente:
+                udp.sendto(msg_json.encode(
+                    "utf-8"), users["connection"])
+
+
 def server(udp):
     global USER_LIST
     print(f"Starting UDP Server on port {PORT}")
@@ -70,6 +80,8 @@ def server(udp):
                     "msg": f"{string_dict['name']} SAIU DO GRUPO"
                 }
 
+                send_message(udp, cliente, string_dict, msg)
+
             elif string_dict["action"] == 3:
                 msg = {
                     "action": 3,
@@ -89,13 +101,8 @@ def server(udp):
                     "msg": string_dict["msg"]
                 }
 
-                msg_json = json.dumps(msg)
+                send_message(udp, cliente, string_dict, msg)
 
-                for users in USER_LIST:
-                    if users["group_id"] == string_dict["group_id"]:
-                        if users["connection"] != cliente:
-                            udp.sendto(msg_json.encode(
-                                "utf-8"), users["connection"])
         except Exception as ex:
             pass
 

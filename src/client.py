@@ -60,7 +60,7 @@ def client():
     menu()
     name = input("Informe o seu nome/apelido -> ")
     try:
-        groupId = int(input("Informe o ID do grup que deseja entrar -> "))
+        groupId = int(input("Informe o ID do grupo que deseja entrar -> "))
         GROUP_ID = groupId
         entryGroup = {
             "action": 1,
