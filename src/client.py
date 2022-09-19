@@ -38,8 +38,9 @@ def server(udp):
                     if string_dict["status"] == 1:
                         ENTRIED_GROUP = True
             elif string_dict["action"] == 2:
-                udp.close()
-                sys.exit(0)
+                if string_dict["group_id"] == GROUP_ID:
+                    if string_dict["status"] == 1:
+                        ENTRIED_GROUP = False
             elif string_dict["action"] == 3:
                 if string_dict["group_id"] == GROUP_ID:
                     if string_dict["status"] == 1:
@@ -66,8 +67,8 @@ def client():
             "name": name,
             "group_id": groupId
         }
-        stringJson = json.dumps(entryGroup)
-        udp.sendto(stringJson.encode('utf-8'), dest)
+        string_json = json.dumps(entryGroup)
+        udp.sendto(string_json.encode('utf-8'), dest)
     except Exception as ex:
         sys.exit(0)
 
@@ -85,14 +86,14 @@ def client():
     while message != "!sair":
         message = input("-> ")
         msg = {
-            "acao": 3,
+            "action": 3,
             "name": name,
             "group_id": GROUP_ID,
             "msg_id": MSG_ID,
             "msg": message
         }
-        stringJson = json.dumps(msg)
-        udp.sendto(stringJson.encode('utf-8'), dest)
+        string_json = json.dumps(msg)
+        udp.sendto(string_json.encode('utf-8'), dest)
         MSG_ID += 1
     menu()
 
